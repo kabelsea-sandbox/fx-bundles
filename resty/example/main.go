@@ -36,11 +36,11 @@ func main() {
 
 	app := fx.New(
 		build.Module,
-		logger.Module,
+		logger.Module(),
 		config.Module(),
 		monitoring.Module,
-		worker.Module,
-		http.Module,
+		worker.Module(),
+		http.Module(),
 		resty.Module,
 
 		config.Provide(NewConfig),

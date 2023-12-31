@@ -1,16 +1,23 @@
 package http
 
-// Config type.
 type Config struct {
 	Debug bool `mapstructure:"debug"`
 
+	Port int `mapstructure:"port" default:"8080"`
+
 	HTTP struct {
-		Bind      string `mapstructure:"bind" default:"0.0.0.0:8080"`
-		KeepAlive bool   `mapstructure:"keep_alive" default:"true"`
+		KeepAlive bool `mapstructure:"keep_alive" default:"true"`
+
+		Tracing struct {
+			Enabled bool `mapstructure:"enabled"`
+		} `mapstructure:"tracing"`
+
+		Metrics struct {
+			Enabled bool `mapstructure:"enabled"`
+		} `mapstructure:"metrics"`
 	} `mapstructure:"http"`
 }
 
-// NewConfig construct.
 func NewConfig() *Config {
 	return &Config{}
 }

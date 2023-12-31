@@ -12,23 +12,25 @@ import (
 const ModuleName = "logger"
 
 // Module provided to fx.
-var Module = fx.Module(
-	ModuleName,
+var Module = func() fx.Option {
+	return fx.Module(
+		ModuleName,
 
-	config.Provide(NewConfig),
+		config.Provide(NewConfig),
 
-	fx.Provide(
-		fx.Annotate(
-			NewLogger,
-			fx.OnStop(
-				func(logger *zap.Logger) { _ = logger.Sync() },
+		fx.Provide(
+			fx.Annotate(
+				NewLogger,
+				fx.OnStop(
+					func(logger *zap.Logger) { _ = logger.Sync() },
+				),
 			),
 		),
-	),
 
-	// force
-	fx.Invoke(func(_ *zap.Logger) {}),
-)
+		// force
+		fx.Invoke(func(_ *zap.Logger) {}),
+	)
+}
 
 // Module provided to fx with nop logger, for testing.
 var ModuleNop = fx.Module(

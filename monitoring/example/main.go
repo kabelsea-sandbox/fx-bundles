@@ -18,11 +18,11 @@ func main() {
 
 	app := fx.New(
 		build.Module,
-		logger.Module,
+		logger.Module(),
 		config.Module(),
-		worker.Module,
+		worker.Module(),
 		monitoring.Module,
-		http.Module,
+		http.Module(),
 	)
 
 	// run

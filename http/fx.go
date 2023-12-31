@@ -12,27 +12,29 @@ import (
 const ModuleName = "http"
 
 // Module provided to fx.
-var Module = fx.Module(
-	ModuleName,
+var Module = func() fx.Option {
+	return fx.Module(
+		ModuleName,
 
-	config.Provide(NewConfig),
+		config.Provide(NewConfig),
 
-	fx.Provide(
-		NewServer,
-		NewServerMux,
-	),
+		fx.Provide(
+			NewServer,
+			NewServerMux,
+		),
 
-	worker.Provide[ServerWorker](NewServerWorker),
+		worker.Provide[ServerWorker](NewServerWorker),
 
-	// controllers
-	fx.Invoke(
-		controllers.NewHealthCheckController,
-	),
+		// controllers
+		fx.Invoke(
+			controllers.NewHealthCheckController,
+		),
 
-	// inject named logger
-	fx.Decorate(
-		func(logger *zap.Logger) *zap.Logger {
-			return logger.Named(ModuleName)
-		},
-	),
-)
+		// inject named logger
+		fx.Decorate(
+			func(logger *zap.Logger) *zap.Logger {
+				return logger.Named(ModuleName)
+			},
+		),
+	)
+}
