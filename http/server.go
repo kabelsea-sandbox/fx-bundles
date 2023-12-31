@@ -1,12 +1,14 @@
 package http
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"go.uber.org/fx"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapio"
 
@@ -16,11 +18,19 @@ import (
 	"github.com/kabelsea-sandbox/fx-bundles/http/validators"
 )
 
+type ServerMuxParam struct {
+	fx.In
+
+	Logger       *zap.Logger
+	Config       *Config
+	BuildContext *build.Context `optional:"true"`
+}
+
 // NewServerMux.
-func NewServerMux(logger *zap.Logger, config *Config, buildContext *build.Context) *echo.Echo {
+func NewServerMux(param ServerMuxParam) *echo.Echo {
 	e := echo.New()
 
-	e.Debug = config.Debug
+	e.Debug = param.Config.Debug
 
 	e.HideBanner = true
 	e.HidePort = true
@@ -28,12 +38,12 @@ func NewServerMux(logger *zap.Logger, config *Config, buildContext *build.Contex
 	// setup zap logger as a echo logger backend
 	e.Logger.SetOutput(
 		&zapio.Writer{
-			Log: logger,
+			Log: param.Logger,
 		},
 	)
 
 	// custom json serializer via jsoniter
-	e.JSONSerializer = serializers.NewJSONSerialzer(config.Debug)
+	e.JSONSerializer = serializers.NewJSONSerialzer(param.Config.Debug)
 
 	// custom validation
 	e.Validator = validators.NewValidator()
@@ -41,27 +51,48 @@ func NewServerMux(logger *zap.Logger, config *Config, buildContext *build.Contex
 	// custom error handler
 	// e.HTTPErrorHandler = NewErrorHandler(config) // TODO
 
-	var middlewares = []echo.MiddlewareFunc{
+	var middlewaresList = []echo.MiddlewareFunc{
 		// recovery
 		middleware.Recover(),
 
 		// request id
 		middleware.RequestID(),
 
+		// cors
+		middleware.CORS(),
+
 		// logger
-		middlewares.LoggerMiddleware(logger),
+		middlewares.LoggerMiddleware(param.Logger),
 
 		// dump
-		middlewares.DumpMiddleware(logger, !config.Debug),
-
-		// metrics
-		echoprometheus.NewMiddleware("http"),
-
-		// tracing
-		middlewares.TraceMiddleware(buildContext.Service, buildContext.Version, buildContext.Environment),
+		middlewares.DumpMiddleware(param.Logger, !param.Config.Debug),
 	}
 
-	e.Use(middlewares...)
+	// metrics
+	if param.Config.HTTP.Metrics.Enabled {
+		middlewaresList = append(middlewaresList,
+			echoprometheus.NewMiddleware("http"),
+		)
+	}
+
+	// tracing
+	if param.Config.HTTP.Tracing.Enabled {
+		var (
+			name, version, environment string = "unknown", "unknown", "unknown"
+		)
+
+		if param.BuildContext != nil {
+			name = param.BuildContext.Service
+			version = param.BuildContext.Version
+			environment = param.BuildContext.Environment
+		}
+
+		middlewaresList = append(middlewaresList,
+			middlewares.TraceMiddleware(name, version, environment),
+		)
+	}
+
+	e.Use(middlewaresList...)
 
 	return e
 }
@@ -69,7 +100,7 @@ func NewServerMux(logger *zap.Logger, config *Config, buildContext *build.Contex
 // NewServer construct.
 func NewServer(config *Config, logger *zap.Logger, e *echo.Echo) *http.Server {
 	server := &http.Server{
-		Addr:              config.HTTP.Bind,
+		Addr:              fmt.Sprintf(":%d", config.Port),
 		Handler:           e,
 		ReadHeaderTimeout: 15 * time.Second,
 	}
