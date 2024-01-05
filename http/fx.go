@@ -21,6 +21,7 @@ var Module = func() fx.Option {
 		fx.Provide(
 			NewServer,
 			NewServerMux,
+			NewRouter,
 		),
 
 		worker.Provide[ServerWorker](NewServerWorker),
