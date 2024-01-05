@@ -15,6 +15,10 @@ type Config struct {
 		Metrics struct {
 			Enabled bool `mapstructure:"enabled"`
 		} `mapstructure:"metrics"`
+
+		Router struct {
+			Prefix string `mapstructure:"prefix"`
+		} `mapstructure:"router"`
 	} `mapstructure:"http"`
 }
 
