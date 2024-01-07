@@ -2,6 +2,7 @@ package ydb
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/ydb-platform/ydb-go-sdk/v3"
 	"go.uber.org/fx"
@@ -24,6 +25,25 @@ var Module = func() fx.Option {
 				fx.OnStop(
 					func(ctx context.Context, db *ydb.Driver) error {
 						return db.Close(ctx)
+					},
+				),
+			),
+		),
+
+		fx.Provide(
+			fx.Annotate(
+				func(driver *ydb.Driver) *sql.DB {
+					return sql.OpenDB(
+						ydb.MustConnector(driver,
+							ydb.WithAutoDeclare(),
+							ydb.WithPositionalArgs(),
+						),
+					)
+				},
+
+				fx.OnStop(
+					func(db *sql.DB) error {
+						return db.Close()
 					},
 				),
 			),
