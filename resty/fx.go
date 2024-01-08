@@ -11,23 +11,21 @@ import (
 const ModuleName = "resty"
 
 // Module provided to fx.
-var Module = fx.Module(
-	ModuleName,
+var Module = func() fx.Option {
+	return fx.Module(
+		ModuleName,
 
-	config.Provide(NewConfig),
+		config.Provide(NewConfig),
 
-	fx.Provide(
-		NewClient,
-	),
+		fx.Provide(
+			NewClient,
+		),
 
-	fx.Invoke(
-		RegisterMetrics,
-	),
-
-	// inject named logger
-	fx.Decorate(
-		func(logger *zap.Logger) *zap.Logger {
-			return logger.With(zap.Namespace(ModuleName))
-		},
-	),
-)
+		// inject named logger
+		fx.Decorate(
+			func(logger *zap.Logger) *zap.Logger {
+				return logger.Named(ModuleName)
+			},
+		),
+	)
+}

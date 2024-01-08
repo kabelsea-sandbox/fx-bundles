@@ -2,9 +2,27 @@ module github.com/kabelsea-sandbox/fx-bundles
 
 go 1.21.5
 
+replace (
+	github.com/aws/aws-sdk-go-v2 => github.com/aws/aws-sdk-go-v2 v1.22.1
+	github.com/aws/aws-sdk-go-v2/config => github.com/aws/aws-sdk-go-v2/config v1.20.0
+	github.com/aws/aws-sdk-go-v2/credentials => github.com/aws/aws-sdk-go-v2/credentials v1.14.0
+	github.com/aws/aws-sdk-go-v2/service/sqs => github.com/aws/aws-sdk-go-v2/service/sqs v1.26.0
+)
+
+require (
+	// We cannot use the latest version of the aws-sdk-go-v2 because it BREAKS the compatibility with the YMQ.
+	// https://github.com/aws/aws-sdk-go-v2/issues/2370
+	github.com/aws/aws-sdk-go-v2 v1.22.1
+	github.com/aws/aws-sdk-go-v2/config v1.20.0
+	github.com/aws/aws-sdk-go-v2/credentials v1.14.0
+	// We cannot use the latest version of the sqs because it uses new JSON protocol v1 which is not supported
+	// by YMQ. Latest version of the sqs which uses query protocol is v1.26.0. And as it is version from 2023-11-01
+	// it is not compatible with the aws-sdk-go-v2 greater than v1.22.2.
+	github.com/aws/aws-sdk-go-v2/service/sqs v1.26.0
+)
+
 require (
 	github.com/TheZeroSlave/zapsentry v1.20.2
-	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc
 	github.com/getsentry/sentry-go v0.25.0
 	github.com/go-playground/validator/v10 v10.16.0
 	github.com/go-resty/resty/v2 v2.11.0
@@ -19,7 +37,6 @@ require (
 	go.opentelemetry.io/otel v1.21.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.21.0
 	go.opentelemetry.io/otel/exporters/prometheus v0.44.0
-	go.opentelemetry.io/otel/metric v1.21.0
 	go.opentelemetry.io/otel/sdk v1.21.0
 	go.opentelemetry.io/otel/sdk/metric v1.21.0
 	go.uber.org/fx v1.20.1
@@ -28,6 +45,15 @@ require (
 )
 
 require (
+	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.14.0 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/configsources v1.2.1 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.5.1 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/ini v1.4.0 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.10.0 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sso v1.16.0 // indirect
+	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.18.0 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sts v1.24.0 // indirect
+	github.com/aws/smithy-go v1.16.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
@@ -69,6 +95,7 @@ require (
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	github.com/ydb-platform/ydb-go-genproto v0.0.0-20231215113745-46f6d30f974a // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.21.0 // indirect
+	go.opentelemetry.io/otel/metric v1.21.0 // indirect
 	go.opentelemetry.io/otel/trace v1.21.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.0.0 // indirect
 	go.uber.org/dig v1.17.1 // indirect

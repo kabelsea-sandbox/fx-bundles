@@ -14,7 +14,7 @@ Expected
 - `RESTY_TIMEOUT`
 
 - `RESTY_URL`           - base url
-- `RESTY_USER_AGENT`    - default gatefi/1.0.0
+- `RESTY_USER_AGENT`    - optional
 - `RESTY_HEADERS`       - optional
 
 Retry policies
@@ -35,4 +35,3 @@ Token auth, optional
 
 - `logger`
 - `config`
-- `monitoring`
