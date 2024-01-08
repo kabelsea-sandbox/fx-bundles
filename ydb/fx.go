@@ -36,7 +36,6 @@ var Module = func() fx.Option {
 					return sql.OpenDB(
 						ydb.MustConnector(driver,
 							ydb.WithAutoDeclare(),
-							ydb.WithPositionalArgs(),
 						),
 					)
 				},
